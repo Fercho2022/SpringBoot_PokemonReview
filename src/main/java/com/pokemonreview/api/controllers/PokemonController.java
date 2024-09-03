@@ -1,8 +1,12 @@
 package com.pokemonreview.api.controllers;
 
 
+import com.pokemonreview.api.dto.PokemonDto;
 import com.pokemonreview.api.models.Pokemon;
 
+import com.pokemonreview.api.repository.PokemonRepository;
+import com.pokemonreview.api.service.PokemonService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,14 @@ import static org.springframework.http.HttpStatus.CREATED;
 // En este caso, todas las rutas comenzarán con "/api/".
 @RequestMapping("/api/")
 public class PokemonController {
+
+    private PokemonService pokemonService;
+
+    @Autowired
+    public PokemonController(PokemonService pokemonService) {
+        this.pokemonService = pokemonService;
+    }
+
     // Define una ruta GET para "/api/pokemon".
     // Este método será invocado cuando se realice una solicitud GET a esta ruta.
     @GetMapping("pokemon")
@@ -54,13 +66,11 @@ public class PokemonController {
     //@RequestBody indica que el cuerpo de la solicitud HTTP se deserializará
     // en un objeto Pokemon. Es decir, Spring tomará el JSON enviado en la solicitud
     // y lo convertirá en una instancia de la clase Pokemon.
-    public ResponseEntity<Pokemon> createPokemon(@RequestBody Pokemon pokemon) {
-        System.out.println(pokemon.getName());
-        System.out.println(pokemon.getType());
+    public ResponseEntity<PokemonDto> createPokemon(@RequestBody PokemonDto pokemonDto) {
 
         //Se está creando un nuevo ResponseEntity que contiene el objeto Pokemon
         // que se recibió, y se está configurando el código de estado HTTP a 201 CREATED.
-        return new ResponseEntity<>(pokemon, HttpStatus.CREATED );
+        return new ResponseEntity<>(pokemonService.createPokemon(pokemonDto), HttpStatus.CREATED );
     }
 
     @PutMapping("pokemon/update/{id}")
