@@ -6,6 +6,9 @@ import com.pokemonreview.api.repository.PokemonRepository;
 import com.pokemonreview.api.service.PokemonService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class PokemonServiceImpl implements PokemonService {
 
@@ -29,4 +32,36 @@ public class PokemonServiceImpl implements PokemonService {
         return pokemonResponse;
 
     }
+
+    @Override
+    public List<PokemonDto> getAllPokemons() {
+        List<Pokemon> pokemons= pokemonRepository.findAll();
+
+        //stream(): Convierte la lista en un flujo de datos (stream), lo que permite operar sobre la
+        // lista de forma más funcional.
+        //map(): Aplica una transformación a cada elemento del stream. En este caso, transforma cada objeto
+        // Pokemon en un PokemonDto mediante el método mapToDto().
+        //collect(Collectors.toList()): Convierte el flujo modificado nuevamente en una lista.
+        return pokemons.stream().map(pokemon -> mapToDto(pokemon)).collect(Collectors.toList());
+    }
+
+    private PokemonDto mapToDto(Pokemon pokemon) {
+        PokemonDto pokemonDto=new PokemonDto();
+        pokemonDto.setId(pokemon.getId());
+        pokemonDto.setName(pokemon.getName());
+        pokemonDto.setType(pokemon.getType());
+        return pokemonDto;
+    }
+
+    private Pokemon mapToEntity(PokemonDto pokemonDto) {
+        Pokemon pokemon=new Pokemon();
+        pokemon.setId(pokemonDto.getId());
+        pokemon.setName(pokemonDto.getName());
+        pokemon.setType(pokemonDto.getType());
+        return pokemon;
+
+    }
+
+
+
 }

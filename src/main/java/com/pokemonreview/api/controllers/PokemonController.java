@@ -35,17 +35,8 @@ public class PokemonController {
     // Define una ruta GET para "/api/pokemon".
     // Este método será invocado cuando se realice una solicitud GET a esta ruta.
     @GetMapping("pokemon")
-    public ResponseEntity<List<Pokemon>> getPokemons() {
-        //// Crear una lista de pokémons. List es una interfaz en Java, mientras que ArrayList
-        // es una implementación concreta de esa interfaz, esto nos permite
-        List<Pokemon> pokemons = new ArrayList<>();
-        pokemons.add(new Pokemon(1, "Squirtle", "Water"));
-        pokemons.add(new Pokemon(2, "Pikachu", "Electric"));
-        pokemons.add(new Pokemon(3, "Charmander", "Fire"));
-        pokemons.add(new Pokemon(4, "Bulbasaur", "Grass/Poison"));
-
-        // Retornar la lista de pokemons envuelta en un ResponseEntity
-        return ResponseEntity.ok(pokemons);
+    public ResponseEntity<List<PokemonDto>> getPokemons() {
+        return new ResponseEntity<>(pokemonService.getAllPokemons(), HttpStatus.OK );
     }
 
 
@@ -68,7 +59,7 @@ public class PokemonController {
     // y lo convertirá en una instancia de la clase Pokemon.
     public ResponseEntity<PokemonDto> createPokemon(@RequestBody PokemonDto pokemonDto) {
 
-        //Se está creando un nuevo ResponseEntity que contiene el objeto Pokemon
+        //Se está creando un nuevo ResponseEntity que contiene el objeto PokemonDto
         // que se recibió, y se está configurando el código de estado HTTP a 201 CREATED.
         return new ResponseEntity<>(pokemonService.createPokemon(pokemonDto), HttpStatus.CREATED );
     }
