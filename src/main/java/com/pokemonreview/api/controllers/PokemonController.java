@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 
 // Anotación que indica que esta clase es un controlador REST de Spring.
@@ -36,13 +38,14 @@ public class PokemonController {
     // Este método será invocado cuando se realice una solicitud GET a esta ruta.
     @GetMapping("pokemon")
     public ResponseEntity<List<PokemonDto>> getPokemons() {
-        return new ResponseEntity<>(pokemonService.getAllPokemons(), HttpStatus.OK );
+        return new ResponseEntity<>(pokemonService.getAllPokemons(), OK );
     }
 
 
     @GetMapping("/pokemon/{id}")
-    public Pokemon pokemonDetail(@PathVariable int id) {
-        return new Pokemon(id, "Squirtle", "Water");
+    public ResponseEntity<PokemonDto> pokemonDetail(@PathVariable int id) {
+        return new ResponseEntity<>(pokemonService.getPokemonById(id), OK);
+
     }
 
 
@@ -65,11 +68,9 @@ public class PokemonController {
     }
 
     @PutMapping("pokemon/update/{id}")
-    public ResponseEntity<Pokemon> updatePokemon(@PathVariable int id, @RequestBody Pokemon pokemon) {
-        System.out.println(pokemon.getName());
-        System.out.println(pokemon.getType());
-        return ResponseEntity.ok(pokemon);
+    public ResponseEntity<PokemonDto> updatePokemon(@PathVariable int id, @RequestBody PokemonDto pokemonDto) {
 
+      return new ResponseEntity<>(pokemonService.updatePokemon(pokemonDto, id), HttpStatus.OK);
     }
 
     @DeleteMapping("pokemon/delete/{id}")
