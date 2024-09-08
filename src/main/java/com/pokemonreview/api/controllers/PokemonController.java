@@ -2,6 +2,7 @@ package com.pokemonreview.api.controllers;
 
 
 import com.pokemonreview.api.dto.PokemonDto;
+import com.pokemonreview.api.dto.PokemonRespomse;
 import com.pokemonreview.api.models.Pokemon;
 
 import com.pokemonreview.api.repository.PokemonRepository;
@@ -37,8 +38,11 @@ public class PokemonController {
     // Define una ruta GET para "/api/pokemon".
     // Este método será invocado cuando se realice una solicitud GET a esta ruta.
     @GetMapping("pokemon")
-    public ResponseEntity<List<PokemonDto>> getPokemons() {
-        return new ResponseEntity<>(pokemonService.getAllPokemons(), OK );
+    public ResponseEntity<PokemonRespomse> getPokemons(
+        @RequestParam(value="pageNo", defaultValue = "0", required = false) int pageNo,
+        @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
+
+        return new ResponseEntity<>(pokemonService.getAllPokemons(pageNo,pageSize), HttpStatus.OK );
     }
 
 
@@ -75,9 +79,8 @@ public class PokemonController {
 
     @DeleteMapping("pokemon/delete/{id}")
     public ResponseEntity<String> deletePokemon(@PathVariable int id) {
-
-        System.out.println(id);
-        return ResponseEntity.ok("Pokemon Deleted successfully ");
+        pokemonService.deletePokemon(id);
+      return new ResponseEntity<>("Pokemon delete", HttpStatus.OK);
     }
 
 }
