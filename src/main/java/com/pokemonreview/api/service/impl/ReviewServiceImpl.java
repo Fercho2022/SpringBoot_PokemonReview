@@ -2,6 +2,8 @@ package com.pokemonreview.api.service.impl;
 
 import com.pokemonreview.api.dto.PokemonDto;
 import com.pokemonreview.api.dto.ReviewDto;
+import com.pokemonreview.api.exceptions.PokemonNotFoundException;
+import com.pokemonreview.api.exceptions.ReviewNotFoundException;
 import com.pokemonreview.api.models.Pokemon;
 import com.pokemonreview.api.models.Review;
 import com.pokemonreview.api.repository.PokemonRepository;
@@ -58,6 +60,23 @@ public class ReviewServiceImpl implements ReviewService {
         // Convertir la lista de Review a ReviewDto
         return reviews.stream().map(this::mapToDto).collect(Collectors.toList());
 
+    }
+
+    @Override
+    public ReviewDto getReviewById(int reviewId, int pokemonId) {
+
+        // Verificar si la Review existe y pertenece al Pokémon
+
+        boolean exists=reviewRepository.existsByIdAndPokemonId(reviewId, pokemonId);
+        if(!exists){
+            throw new ReviewNotFoundException("Review with the associated Pokemon not found");
+        }
+        // Obtener la Review después de verificar la relación
+
+        Review review= reviewRepository.findById(reviewId).orElseThrow(()->new ReviewNotFoundException("Review not found"));
+
+        // Convertir la Review a ReviewDto
+        return mapToDto(review);
     }
 
 

@@ -36,4 +36,14 @@ public class ReviewController {
            List<ReviewDto> reviewDtos= reviewService.getReviewsByPokemonId(pokemonId);
            return new ResponseEntity<>(reviewDtos, HttpStatus.OK);
     }
+
+@GetMapping("/{pokemonId}/reviews/{reviewId}")
+    public ResponseEntity<ReviewDto> getReview(@PathVariable int pokemonId, @PathVariable int reviewId) {
+
+        ReviewDto reviewDto=reviewService.getReviewById(reviewId, pokemonId);
+        return new ResponseEntity<>(reviewDto, HttpStatus.OK);
+    }
+
 }
+
+

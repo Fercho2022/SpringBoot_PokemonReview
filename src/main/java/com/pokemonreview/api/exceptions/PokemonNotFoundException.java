@@ -7,4 +7,5 @@ public class PokemonNotFoundException extends RuntimeException{
 
         super(message);
     }
+
 }
