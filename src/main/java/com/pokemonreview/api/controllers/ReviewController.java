@@ -27,23 +27,35 @@ public class ReviewController {
 
     @PostMapping("/{pokemonId}/review")
     public ResponseEntity<ReviewDto> createReview(@PathVariable int pokemonId, @RequestBody ReviewDto reviewDto) {
-        ReviewDto newReviewDto= reviewService.createReview(pokemonId, reviewDto);
+        ReviewDto newReviewDto = reviewService.createReview(pokemonId, reviewDto);
         return new ResponseEntity<>(newReviewDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/{pokemonId}/reviews")
-    public ResponseEntity<List<ReviewDto>> getReviewsByPokemonId(@PathVariable int pokemonId){
-           List<ReviewDto> reviewDtos= reviewService.getReviewsByPokemonId(pokemonId);
-           return new ResponseEntity<>(reviewDtos, HttpStatus.OK);
+    public ResponseEntity<List<ReviewDto>> getReviewsByPokemonId(@PathVariable int pokemonId) {
+        List<ReviewDto> reviewDtos = reviewService.getReviewsByPokemonId(pokemonId);
+        return new ResponseEntity<>(reviewDtos, HttpStatus.OK);
     }
 
-@GetMapping("/{pokemonId}/reviews/{reviewId}")
+    @GetMapping("/{pokemonId}/reviews/{reviewId}")
     public ResponseEntity<ReviewDto> getReview(@PathVariable int pokemonId, @PathVariable int reviewId) {
 
-        ReviewDto reviewDto=reviewService.getReviewById(reviewId, pokemonId);
+        ReviewDto reviewDto = reviewService.getReviewById(reviewId, pokemonId);
         return new ResponseEntity<>(reviewDto, HttpStatus.OK);
     }
 
+    @PutMapping("/{pokemonId}/reviews/{reviewId}")
+    public ResponseEntity<ReviewDto> updateReview(@PathVariable int reviewId, @PathVariable int pokemonId, @RequestBody ReviewDto reviewDto) {
+        ReviewDto updatedReviewDto = reviewService.updateReview(reviewId, pokemonId, reviewDto);
+        return new ResponseEntity<>(updatedReviewDto, HttpStatus.OK);
+
+    }
+
+    @DeleteMapping("/{pokemonId}/reviews/{reviewId}")
+    public ResponseEntity<String> deleteReview(@PathVariable int reviewId, @PathVariable int pokemonId) {
+        reviewService.deleteReview(reviewId, pokemonId);
+        return new ResponseEntity<>("Review deleted", HttpStatus.OK);
+    }
 }
 
 
