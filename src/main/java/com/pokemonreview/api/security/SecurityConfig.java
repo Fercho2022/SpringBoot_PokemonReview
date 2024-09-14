@@ -1,9 +1,12 @@
 package com.pokemonreview.api.security;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -18,7 +21,14 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-// La anotación @Bean se utiliza para indicar que el método FilterChain produce un bean que debe ser gestionado
+    private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    // La anotación @Bean se utiliza para indicar que el método FilterChain produce un bean que debe ser gestionado
 //  por el contenedor de Spring. Esto permite que Spring cree y gestione la instancia de SecurityFilterChain
 //  y la inyecte donde sea necesario.
 
@@ -41,7 +51,7 @@ public class SecurityConfig {
                 //.authorizeRequests(auth -> auth.anyRequest().authenticated()): Asegura que cualquier solicitud que se
                 // realice a la aplicación esté autenticada. Todos los endpoints estarán protegidos por autenticación.
                 .authorizeRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET).permitAll()    // Permite acceso público a todas las solicitudes GET
+                .requestMatchers(HttpMethod.GET).authenticated()    // Permite acceso público a todas las solicitudes GET
                         .anyRequest().authenticated())          // Requiere autenticación para cualquier otra solicitud
                 //.httpBasic(withDefaults()): Habilita la autenticación HTTP Basic, que solicita a los usuarios
                 // un nombre de usuario y una contraseña a través del navegador o cliente de API.
@@ -76,6 +86,12 @@ public class SecurityConfig {
         // persistirán después de que la aplicación se cierre.
     return new InMemoryUserDetailsManager(admin,user);
 
+}
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws  Exception {
+
+        return authenticationConfiguration.getAuthenticationManager();
 }
 
 }
