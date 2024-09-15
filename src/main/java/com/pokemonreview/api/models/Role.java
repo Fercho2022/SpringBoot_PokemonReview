@@ -1,6 +1,8 @@
 package com.pokemonreview.api.models;
 
+
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +16,8 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-private String name;
+    @Column(nullable = false, unique = true)
+    private String name;
 
 
 }

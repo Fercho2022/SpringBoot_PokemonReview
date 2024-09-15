@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -51,7 +53,7 @@ public class SecurityConfig {
                 //.authorizeRequests(auth -> auth.anyRequest().authenticated()): Asegura que cualquier solicitud que se
                 // realice a la aplicación esté autenticada. Todos los endpoints estarán protegidos por autenticación.
                 .authorizeRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET).authenticated()    // Permite acceso público a todas las solicitudes GET
+                .requestMatchers("/api/auth/**").permitAll()    // Permite acceso público a todas las solicitudes GET
                         .anyRequest().authenticated())          // Requiere autenticación para cualquier otra solicitud
                 //.httpBasic(withDefaults()): Habilita la autenticación HTTP Basic, que solicita a los usuarios
                 // un nombre de usuario y una contraseña a través del navegador o cliente de API.
@@ -93,5 +95,11 @@ public class SecurityConfig {
 
         return authenticationConfiguration.getAuthenticationManager();
 }
+
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 }
