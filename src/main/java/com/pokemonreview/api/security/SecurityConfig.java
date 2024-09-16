@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,9 +26,12 @@ public class SecurityConfig {
 
     private CustomUserDetailsService userDetailsService;
 
+    private JwtAuthEntryPoint jwtAuthEntryPoint;
+
     @Autowired
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint) {
         this.userDetailsService = userDetailsService;
+        this.jwtAuthEntryPoint = jwtAuthEntryPoint;
     }
 
     // La anotación @Bean se utiliza para indicar que el método FilterChain produce un bean que debe ser gestionado
@@ -50,11 +54,41 @@ public class SecurityConfig {
                 // inician sesión, puede ser recomendable no deshabilitar CSRF.
                 .csrf(csrf -> csrf.disable())
 
-                //.authorizeRequests(auth -> auth.anyRequest().authenticated()): Asegura que cualquier solicitud que se
-                // realice a la aplicación esté autenticada. Todos los endpoints estarán protegidos por autenticación.
+                //Aquí defines un AuthenticationEntryPoint personalizado (jwtAuthEntryPoint) para manejar los
+                // errores de autenticación, como los casos donde se intenta acceder sin autenticarse o con un JWT
+                // inválido. El método commence de tu clase JwtAuthEntryPoint será invocado cuando ocurra un error
+                //  de autenticación.). El propósito de este método es enviar una respuesta personalizada al cliente
+                //   (generalmente una respuesta con código de estado 401 - No autorizado). Así es como tu aplicación
+                //   maneja y responde a solicitudes no autenticadas o inválidas.
+                //Internamente, cuando una excepción de autenticación es lanzada, Spring Security tiene
+                // un manejador de excepciones que revisa qué AuthenticationEntryPoint está configurado.
+                // En este caso, como has configurado tu clase JwtAuthEntryPoint, Spring Security delega
+                // el manejo de esa excepción al commence de tu clase, el cual proporciona la respuesta
+                // adecuada al cliente.
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(jwtAuthEntryPoint)
+                )
+                //.and(): Permite continuar con la siguiente configuración en la cadena de seguridad.
+
+
+                //.sessionManagement(): Configura la política de manejo de sesiones. En este caso,
+                // se está utilizando STATELESS, lo que significa que no se mantendrá ninguna sesión en el servidor.
+                // Esto es útil para aplicaciones que funcionan con autenticación basada en JWT.
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+
+
+                //Permites el acceso a rutas relacionadas con la autenticación (/api/auth/**) sin necesidad
+                // de autenticarse. Esto es típico para rutas de inicio de sesión o registro. Para cualquier
+                // otra solicitud, se requiere autenticación.Permites el acceso a rutas relacionadas con la
+                // autenticación (/api/auth/**) sin necesidad de autenticarse. Esto es típico para rutas de
+                // inicio de sesión o registro. Para cualquier otra solicitud, se requiere autenticación.
                 .authorizeRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()    // Permite acceso público a todas las solicitudes GET
                         .anyRequest().authenticated())          // Requiere autenticación para cualquier otra solicitud
+
                 //.httpBasic(withDefaults()): Habilita la autenticación HTTP Basic, que solicita a los usuarios
                 // un nombre de usuario y una contraseña a través del navegador o cliente de API.
                 .httpBasic(withDefaults()); // Enable HTTP Basic authentication
