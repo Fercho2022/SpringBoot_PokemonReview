@@ -1,12 +1,14 @@
 package com.pokemonreview.api.controllers;
 
 
+import com.pokemonreview.api.dto.AuthResponseDto;
 import com.pokemonreview.api.dto.LoginDto;
 import com.pokemonreview.api.dto.RegisterDto;
 
 import com.pokemonreview.api.models.UserEntity;
 import com.pokemonreview.api.repository.RoleRepository;
 import com.pokemonreview.api.repository.UserRepository;
+import com.pokemonreview.api.security.JWTGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,17 +34,19 @@ public class AuthController {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+    private JWTGenerator jwtGenerator;
 
     @Autowired
     public AuthController(UserRepository userRepository,
                           AuthenticationManager authenticationManager,
                           RoleRepository roleRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, JWTGenerator jwtGenerator) {
 
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtGenerator = jwtGenerator;
     }
 
     @PostMapping("register")
@@ -72,7 +76,7 @@ public class AuthController {
         return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
     }
     @PostMapping("login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto){
 
         // Crear un objeto de autenticación con las credenciales del usuario, este objeto es esencial para
         // gestionar y verificar los permisos del usuario en el resto de la aplicación.
@@ -84,7 +88,15 @@ public class AuthController {
         // aplicación para que otros componentes  (como servicios, controladores, etc.) de la aplicación
         // puedan acceder a la información del usuario autenticado y verifiquen sus permisos.
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("Authentication successful!", HttpStatus.OK);
+        //Una vez que el usuario ha sido autenticado, se utiliza un JWTGenerator para crear un
+        // token JWT basado en la autenticación. Este token es único para el usuario y se puede
+        // utilizar en futuras solicitudes para identificar al usuario sin necesidad de volver
+        // a ingresar las credenciales.
+        String token= jwtGenerator.generateToken(authentication);
+        // Finalmente, el token JWT generado se devuelve en un objeto AuthResponseDto, dentro de una
+        // respuesta HTTP con el estado OK. El cliente podrá usar este token en futuras solicitudes
+        // para acceder a recursos protegidos de la API.
+        return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
 
 
     }

@@ -1,9 +1,11 @@
 package com.pokemonreview.api.security;
 
 
+import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -24,14 +27,23 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
     private CustomUserDetailsService userDetailsService;
 
     private JwtAuthEntryPoint jwtAuthEntryPoint;
 
+
+    private final JWTAuthenticationFilter jwtAuthenticationFilter;  // Asegúrate de tener este filtro creado
+
+
+
     @Autowired
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, @Lazy JWTAuthenticationFilter jwtAuthenticationFilter) {
+
         this.userDetailsService = userDetailsService;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+
     }
 
     // La anotación @Bean se utiliza para indicar que el método FilterChain produce un bean que debe ser gestionado
@@ -93,6 +105,9 @@ public class SecurityConfig {
                 // un nombre de usuario y una contraseña a través del navegador o cliente de API.
                 .httpBasic(withDefaults()); // Enable HTTP Basic authentication
 
+        // Agrega tu filtro antes de UsernamePasswordAuthenticationFilter
+
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         //http.build(): Este método se encarga de ensamblar todas las configuraciones que has definido usando la instancia de HttpSecurity.
         // Internamente, configura un conjunto de filtros de seguridad que Spring Security usa para inspeccionar y manejar cada solicitud HTTP.
         //Al ejecutar http.build(), estás diciendo "OK, he terminado de configurar las reglas de seguridad, ahora construye la cadena de filtros
@@ -132,8 +147,12 @@ public class SecurityConfig {
 
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder();
     }
+
+@Bean
+    public JWTAuthenticationFilter jwtAuthenticationFilter() {
+        return new JWTAuthenticationFilter();
+}
 
 }

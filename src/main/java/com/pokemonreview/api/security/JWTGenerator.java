@@ -20,7 +20,7 @@ public class JWTGenerator {
 //Este método genera un JWT basado en la información del usuario autenticado proporcionada a través del
 // objeto Authentication. El token generado será utilizado para autenticar al usuario en futuras solicitudes.
 
-    public String generateJWT(Authentication authentication) {
+    public String generateToken(Authentication authentication) {
         //authentication.getName(): Obtiene el nombre de usuario (generalmente el nombre o email) del usuario
         // autenticado. Este nombre de usuario se utiliza como el "sujeto" (subject) del JWT, que identifica al
         // usuario.
